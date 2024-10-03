@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       }
     } else {
       const hashedPassword = await bcrypt.hash(password, 10);
-      await new UserModel({
+      const newUser = new UserModel({
         username,
         email,
         password: hashedPassword,
@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
         isVerified: false,
         message: [],
       });
+      await newUser.save();
     }
 
     //send verification email

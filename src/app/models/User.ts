@@ -8,6 +8,7 @@ export interface User extends Document {
   password: string;
   image: string;
   bio: string;
+  isVerified: boolean;
   onBoarded: boolean;
   communities: Community[];
   threads: Thread[];
@@ -33,6 +34,10 @@ const UserSchema: Schema<User> = new Schema({
     type: String,
     required: [true, "Password is required"],
     unique: true,
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
   },
   image: String,
   bio: String,
