@@ -9,7 +9,7 @@ export const authOptions: NextAuthOptions = {
       id: "credentials",
       name: "credentials",
       credentials: {
-        emailr: {
+        email: {
           label: "Email",
           type: "text",
           placeholder: "jsmith@gmail.com",
@@ -17,7 +17,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any): Promise<any> {
-        console.log("object");
+        console.log("hello");
         await dbConnect();
         try {
           const user = await UserModel.findOne({
