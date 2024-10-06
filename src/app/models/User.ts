@@ -12,6 +12,9 @@ export interface User extends Document {
   onBoarded: boolean;
   communities: Community[];
   threads: Thread[];
+  friendRequest: User[];
+  friends: User[];
+  sentFriendRequest: User[];
   verifyCode: string;
   verifyCodeExpiry: Date;
 }
@@ -58,6 +61,24 @@ const UserSchema: Schema<User> = new Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Community",
+    },
+  ],
+  friendRequest: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  friends: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  sentFriendRequest: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   ],
   threads: [

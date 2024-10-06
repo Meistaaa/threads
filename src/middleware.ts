@@ -14,7 +14,6 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
   const url = request.nextUrl;
-  console.log(token);
   // Check if user is already on the homepage and authenticated
   if (token && url.pathname === "/") {
     return NextResponse.next(); // Allow access to the homepage

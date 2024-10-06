@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: true, message: getPostById },
+      { success: true, data: getPostById },
       { status: 200 }
     );
   } catch (error) {
