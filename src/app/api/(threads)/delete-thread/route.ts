@@ -1,5 +1,7 @@
 import dbConnect from "@/app/lib/dbConnect";
 import Thread from "@/app/models/Thread";
+import UserModel from "@/app/models/User";
+import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(req: NextRequest) {
@@ -8,7 +10,16 @@ export async function DELETE(req: NextRequest) {
     const reqBody = await req.json();
     const { id } = reqBody;
 
-    const deleteResult = await Thread.deleteOne({ _id: id });
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET! });
+    const user = await UserModel.findById(token?._id);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "UnAuthorized" },
+        { status: 401 }
+      );
+    }
+
+    const deleteResult = await Thread.deleteOne({ _id: id, author: user.id });
 
     if (deleteResult.deletedCount === 0) {
       return NextResponse.json(
