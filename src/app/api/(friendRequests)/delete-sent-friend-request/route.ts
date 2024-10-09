@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Find fromUser and assert the type
+    // Find the user and assert the type
     const foundUser = await UserModel.findById(user._id);
     if (!foundUser) {
       return NextResponse.json(
@@ -29,14 +29,18 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       );
     }
+
     const reqBody = await req.json();
     const { id } = reqBody;
+
+    console.log(id);
+    console.log(foundUser.sentFriendRequest);
 
     // Ensure id is an array
     const idsToRemove = Array.isArray(id) ? id : [id];
 
     // Filter out the IDs that need to be removed
-    foundUser.friendRequest = foundUser.friendRequest.filter(
+    foundUser.sentFriendRequest = foundUser.sentFriendRequest.filter(
       (friendId) => !idsToRemove.includes(friendId.toString())
     );
 
@@ -46,8 +50,9 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
-      { success: false, message: "Error Registering User" },
+      { success: false, message: "Error processing request" },
       { status: 500 }
     );
   }

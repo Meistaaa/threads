@@ -8,7 +8,6 @@ export async function POST(req: NextRequest) {
   await dbConnect();
   try {
     const session = await getServerSession(authOptions);
-    console.log(session);
     const user: User = session?.user as User;
     if (!session || !user) {
       return NextResponse.json(
@@ -24,6 +23,7 @@ export async function POST(req: NextRequest) {
     const reqBody = await req.json();
     const { text } = reqBody;
     const newPost = new Thread({
+      author: user._id,
       text,
     });
 

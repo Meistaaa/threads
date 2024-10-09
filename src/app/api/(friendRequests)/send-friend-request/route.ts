@@ -1,29 +1,32 @@
 import dbConnect from "@/app/lib/dbConnect";
-import UserModel from "@/app/models/User";
-import { getToken } from "next-auth/jwt";
+import UserModel, { User } from "@/app/models/User";
 import { NextRequest, NextResponse } from "next/server";
+import { authOptions } from "../../(authentication)/auth/[...nextauth]/options";
+import { getServerSession } from "next-auth";
 
 export async function POST(req: NextRequest) {
   await dbConnect();
   try {
-    const token = await getToken({
-      req,
-      secret: process.env.NEXTAUTH_SECRET,
-    });
-
-    // Ensure that the token contains a valid _id
-    if (!token?._id) {
+    const session = await getServerSession(authOptions);
+    const user: User = session?.user as User;
+    if (!session || !user) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 404 }
+        {
+          success: false,
+          message: "Not Authenticated",
+        },
+        {
+          status: 401,
+        }
       );
     }
 
     // Find fromUser and assert the type
-    const fromUser = await UserModel.findById(token._id);
+    const fromUser = await UserModel.findById(user._id);
+    console.log(fromUser?.username);
     if (!fromUser) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "User Does Not Exist" },
         { status: 404 }
       );
     }
