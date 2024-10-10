@@ -48,6 +48,7 @@ export async function GET(req: NextRequest) {
         { status: 402 }
       );
     }
+    console.log("object");
 
     foundUser.friends.push(id);
     await foundUser.save();
