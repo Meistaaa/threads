@@ -21,10 +21,10 @@ export async function POST(req: NextRequest) {
       );
     }
     const reqBody = await req.json();
-    const { text } = reqBody;
+    const { content } = reqBody;
     const newPost = new Thread({
       author: user._id,
-      text,
+      text: content,
     });
 
     await newPost.save();
