@@ -6,12 +6,14 @@ import { RightSidebar } from "@/components/right-sidebar/RightSidebar";
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
-      <div className="flex flex-1">
-        <LeftSidebar />
-        <main className="flex-1 w-full max-w-[600px] mx-auto border-x border-gray-800">
-          <MainContent />
-        </main>
-        <RightSidebar />
+      <div className="flex flex-1 justify-center">
+        <div className="flex w-full max-w-7xl">
+          <LeftSidebar />
+          <main className="flex-1 border-x border-gray-800 min-h-screen">
+            <MainContent />
+          </main>
+          <RightSidebar />
+        </div>
       </div>
       <BottomNav />
     </div>

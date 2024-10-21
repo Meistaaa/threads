@@ -6,6 +6,7 @@ export interface Thread extends Document {
   text: string;
   author: User;
   community: Community;
+  imageUrls: string[];
   createdAt: Date;
   parentId: string;
 }
@@ -19,6 +20,11 @@ const threadSchema: Schema<Thread> = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  imageUrls: [
+    {
+      type: String,
+    },
+  ],
   community: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Community",
