@@ -1,8 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { MessageSquare, Heart, Upload, Repeat2 } from "lucide-react";
 import Image from "next/image";
+import ThreadPost from "../thread-post/thread-post";
 
 export function MainContent() {
   return (
@@ -11,7 +10,7 @@ export function MainContent() {
         <h1 className="text-xl font-bold">Home</h1>
       </header>
       <div className="flex-1">
-        <TweetBox />
+        <ThreadPost></ThreadPost>
         <Tweet
           avatar="/placeholder.svg?height=40&width=40"
           name="User Name"
@@ -24,69 +23,31 @@ export function MainContent() {
           name="Another User"
           handle="@anotheruser"
           content="Here's another tweet without an image."
+        />{" "}
+        <Tweet
+          avatar="/placeholder.svg?height=40&width=40"
+          name="Another User"
+          handle="@anotheruser"
+          content="Here's another tweet without an image."
+        />{" "}
+        <Tweet
+          avatar="/placeholder.svg?height=40&width=40"
+          name="Another User"
+          handle="@anotheruser"
+          content="Here's another tweet without an image."
+        />{" "}
+        <Tweet
+          avatar="/placeholder.svg?height=40&width=40"
+          name="Another User"
+          handle="@anotheruser"
+          content="Here's another tweet without an image."
+        />{" "}
+        <Tweet
+          avatar="/placeholder.svg?height=40&width=40"
+          name="Another User"
+          handle="@anotheruser"
+          content="Here's another tweet without an image."
         />
-      </div>
-    </div>
-  );
-}
-
-function TweetBox() {
-  return (
-    <div className="flex space-x-4 p-4 border-b border-gray-800">
-      <Avatar>
-        <AvatarImage src="/placeholder.svg?height=40&width=40" />
-        <AvatarFallback>CN</AvatarFallback>
-      </Avatar>
-      <div className="flex-1">
-        <Input
-          className="w-full bg-transparent text-xl placeholder-gray-500 border-none focus:ring-0"
-          placeholder="What is happening?!"
-        />
-        <div className="flex justify-between items-center mt-4">
-          <div className="flex space-x-2 text-blue-400">
-            <button>
-              <Image
-                src="/placeholder.svg?height=20&width=20"
-                alt="Media"
-                width={20}
-                height={20}
-              />
-            </button>
-            <button>
-              <Image
-                src="/placeholder.svg?height=20&width=20"
-                alt="GIF"
-                width={20}
-                height={20}
-              />
-            </button>
-            <button>
-              <Image
-                src="/placeholder.svg?height=20&width=20"
-                alt="Poll"
-                width={20}
-                height={20}
-              />
-            </button>
-            <button>
-              <Image
-                src="/placeholder.svg?height=20&width=20"
-                alt="Emoji"
-                width={20}
-                height={20}
-              />
-            </button>
-            <button>
-              <Image
-                src="/placeholder.svg?height=20&width=20"
-                alt="Schedule"
-                width={20}
-                height={20}
-              />
-            </button>
-          </div>
-          <Button className="bg-blue-500 hover:bg-blue-600">Post</Button>
-        </div>
       </div>
     </div>
   );
