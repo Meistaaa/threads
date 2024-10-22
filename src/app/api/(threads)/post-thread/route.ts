@@ -20,8 +20,19 @@ export async function POST(req: NextRequest) {
         }
       );
     }
+    console.log("user._id : ", user._id);
+
     const reqBody = await req.json();
-    const { content, imageUrls } = reqBody;
+    const {
+      content,
+      imageUrls,
+    }: { content: string; imageUrls: Array<string> } = reqBody;
+    if (content.length === 0 && imageUrls.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "The Thread cannot be empty" },
+        { status: 400 }
+      );
+    }
     const newPost = new Thread({
       author: user._id,
       text: content,

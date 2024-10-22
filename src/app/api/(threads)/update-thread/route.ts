@@ -1,10 +1,23 @@
 import dbConnect from "@/app/lib/dbConnect";
+import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
 import Thread from "@/app/models/Thread";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(req: NextRequest) {
   await dbConnect();
   try {
+    const user = await authenticateUser();
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Not Authenticated",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
     const reqBody = await req.json();
     const { id, text } = reqBody;
 

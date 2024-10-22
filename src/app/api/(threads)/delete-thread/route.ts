@@ -1,23 +1,25 @@
 import dbConnect from "@/app/lib/dbConnect";
+import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
 import Thread from "@/app/models/Thread";
-import UserModel from "@/app/models/User";
-import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(req: NextRequest) {
   await dbConnect();
   try {
-    const reqBody = await req.json();
-    const { id } = reqBody;
-
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET! });
-    const user = await UserModel.findById(token?._id);
+    const user = await authenticateUser();
     if (!user) {
       return NextResponse.json(
-        { success: false, message: "UnAuthorized" },
-        { status: 401 }
+        {
+          success: false,
+          message: "Not Authenticated",
+        },
+        {
+          status: 401,
+        }
       );
     }
+    const reqBody = await req.json();
+    const { id } = reqBody;
 
     const deleteResult = await Thread.deleteOne({ _id: id, author: user.id });
 

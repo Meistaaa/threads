@@ -1,15 +1,13 @@
 import dbConnect from "@/app/lib/dbConnect";
-import UserModel, { User } from "@/app/models/User";
-import { getServerSession } from "next-auth";
+import UserModel from "@/app/models/User";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "../../(authentication)/auth/[...nextauth]/options";
+import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
 
 export async function POST(req: NextRequest) {
   await dbConnect();
   try {
-    const session = await getServerSession(authOptions);
-    const user: User = session?.user as User;
-    if (!session || !user) {
+    const user = await authenticateUser();
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
