@@ -1,6 +1,7 @@
 import dbConnect from "@/app/lib/dbConnect";
 import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
 import Thread from "@/app/models/Thread";
+import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -23,30 +24,44 @@ export async function GET(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { success: false, message: "Failed to get a post" },
+        { success: false, message: "Failed to get a Thread" },
         { status: 400 }
       );
     }
 
     console.log("Fetching thread with id:", id);
-    const getPostById = await Thread.findById(id);
+    const getThreadById = await Thread.findById(id);
 
-    if (!getPostById) {
+    if (!getThreadById) {
       return NextResponse.json(
-        { success: false, message: "Post Does Not Exist" },
+        { success: false, message: "Thread Does Not Exist" },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { success: true, data: getPostById },
+      { success: true, data: getThreadById },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Failed to get a post", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to get a post" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    if (error instanceof mongoose.Error) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: error.message || "Unable to get thread at the moment.",
+        },
+        { status: 500 }
+      );
+    } else if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 500 }
+      );
+    } else {
+      return NextResponse.json(
+        { success: false, message: "An unexpected error occurred." },
+        { status: 500 }
+      );
+    }
   }
 }

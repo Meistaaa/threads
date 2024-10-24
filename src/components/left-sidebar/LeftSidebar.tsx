@@ -12,19 +12,19 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { icon: Home, label: "Home" },
-  { icon: Search, label: "Explore" },
-  { icon: Bell, label: "Notifications" },
-  { icon: Mail, label: "Messages" },
-  { icon: List, label: "Lists" },
-  { icon: Bookmark, label: "Bookmarks" },
-  { icon: User, label: "Profile" },
-  { icon: MoreHorizontal, label: "More" },
+  { icon: Home, label: "Home", href: "/" },
+  { icon: Search, label: "Explore", href: "/" },
+  { icon: Bell, label: "Notifications", href: "/" },
+  { icon: Mail, label: "Messages", href: "/" },
+  { icon: List, label: "Lists", href: "/" },
+  { icon: Bookmark, label: "Bookmarks", href: "/" },
+  { icon: User, label: "Profile", href: "/profile" },
+  { icon: MoreHorizontal, label: "More", href: "/" },
 ];
 
 export function LeftSidebar() {
   return (
-    <aside className="w-20 xl:w-72 p-4 flex flex-col h-screen sticky top-0 hidden sm:flex">
+    <aside className="w-20 xl:w-72 p-4  flex-col h-screen sticky top-0 hidden sm:flex">
       <div className="mb-4">
         <svg
           viewBox="0 0 24 24"
@@ -39,15 +39,14 @@ export function LeftSidebar() {
       <nav className="space-y-2">
         {navItems.map((item) => (
           <NavItem
+            href={item.href}
             key={item.label}
             icon={<item.icon className="h-6 w-6" />}
             label={item.label}
           />
         ))}
       </nav>
-      <Button className="mt-4 w-full bg-blue-500 hover:bg-blue-600 hidden xl:flex">
-        Tweet
-      </Button>
+
       <Button className="mt-4 w-full bg-blue-500 hover:bg-blue-600 xl:hidden rounded-full p-3">
         <svg
           viewBox="0 0 24 24"
@@ -63,10 +62,18 @@ export function LeftSidebar() {
   );
 }
 
-function NavItem({ icon, label }: { icon: React.ReactNode; label: string }) {
+function NavItem({
+  icon,
+  label,
+  href,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+}) {
   return (
     <Link
-      href="#"
+      href={href}
       className="flex items-center space-x-4 text-xl hover:bg-gray-900 rounded-full p-3"
     >
       {icon}

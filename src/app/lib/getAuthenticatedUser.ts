@@ -14,6 +14,7 @@ export async function authenticateUser() {
     }
     const getUser = await UserModel.findById(user._id);
     console.log(getUser?.id);
+    console.log("hel");
     return getUser?.id;
   } catch (error) {
     console.log("Failed to upload a post", error);

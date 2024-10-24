@@ -1,10 +1,10 @@
 import dbConnect from "@/app/lib/dbConnect";
 import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
-import Thread from "@/app/models/Thread";
+import UserModel from "@/app/models/User";
 import mongoose from "mongoose";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function DELETE(req: NextRequest) {
+export async function GET() {
   await dbConnect();
   try {
     const user = await authenticateUser();
@@ -19,28 +19,21 @@ export async function DELETE(req: NextRequest) {
         }
       );
     }
-    const reqBody = await req.json();
-    const { id } = reqBody;
-
-    const deleteResult = await Thread.deleteOne({ _id: id, author: user.id });
-
-    if (deleteResult.deletedCount === 0) {
+    const me = await UserModel.findById(user._id).select("-password");
+    if (!me) {
       return NextResponse.json(
-        { success: false, message: "Thread not found" },
+        { success: false, message: "User Does Not Exist" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(
-      { success: true, message: "Thread deleted successfully" },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: false, data: me }, { status: 500 });
   } catch (error: unknown) {
     if (error instanceof mongoose.Error) {
       return NextResponse.json(
         {
           success: false,
-          message: error.message || "Unable to delete thread at the moment.",
+          message: error.message || "Unable to get user at the moment.",
         },
         { status: 500 }
       );

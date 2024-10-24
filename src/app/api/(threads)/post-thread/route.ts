@@ -1,15 +1,14 @@
 import dbConnect from "@/app/lib/dbConnect";
-import { getServerSession, User } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "../../(authentication)/auth/[...nextauth]/options";
 import Thread from "@/app/models/Thread";
+import mongoose from "mongoose";
+import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
 
 export async function POST(req: NextRequest) {
   await dbConnect();
   try {
-    const session = await getServerSession(authOptions);
-    const user: User = session?.user as User;
-    if (!session || !user) {
+    const user = await authenticateUser();
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
@@ -20,7 +19,6 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    console.log("user._id : ", user._id);
 
     const reqBody = await req.json();
     const {
@@ -33,13 +31,13 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const newPost = new Thread({
+    const newThread = new Thread({
       author: user._id,
       text: content,
       imageUrls,
     });
-
-    await newPost.save();
+    await newThread.save();
+    console.log("helo from postthread");
     return NextResponse.json(
       {
         success: true,
@@ -47,11 +45,25 @@ export async function POST(req: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error) {
-    console.log("Failed to upload a post", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to upload a post" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    if (error instanceof mongoose.Error) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: error.message || "Unable to post thread at the moment.",
+        },
+        { status: 500 }
+      );
+    } else if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 500 }
+      );
+    } else {
+      return NextResponse.json(
+        { success: false, message: "An unexpected error occurred." },
+        { status: 500 }
+      );
+    }
   }
 }

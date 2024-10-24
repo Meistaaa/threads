@@ -6,7 +6,7 @@ export interface User extends Document {
   username: string;
   email: string;
   password: string;
-  image: string;
+  imageUrl: string;
   bio: string;
   isVerified: boolean;
   onBoarded: boolean;
@@ -42,7 +42,7 @@ const UserSchema: Schema<User> = new Schema({
     type: Boolean,
     default: false,
   },
-  image: String,
+  imageUrl: String,
   bio: String,
   verifyCode: {
     type: String,
