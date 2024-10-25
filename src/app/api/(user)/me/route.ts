@@ -19,7 +19,7 @@ export async function GET() {
         }
       );
     }
-    const me = await UserModel.findById(user._id).select("-password");
+    const me = await UserModel.findById(user).select("-password");
     if (!me) {
       return NextResponse.json(
         { success: false, message: "User Does Not Exist" },

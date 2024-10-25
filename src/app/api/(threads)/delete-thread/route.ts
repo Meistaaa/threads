@@ -22,7 +22,7 @@ export async function DELETE(req: NextRequest) {
     const reqBody = await req.json();
     const { id } = reqBody;
 
-    const deleteResult = await Thread.deleteOne({ _id: id, author: user.id });
+    const deleteResult = await Thread.deleteOne({ _id: id, author: user });
 
     if (deleteResult.deletedCount === 0) {
       return NextResponse.json(

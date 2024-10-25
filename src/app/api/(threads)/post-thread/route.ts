@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-
+    console.log("user._id", user);
     const reqBody = await req.json();
     const {
       content,
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const newThread = new Thread({
-      author: user._id,
+      author: user,
       text: content,
       imageUrls,
     });

@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const foundUser = await UserModel.findById(user._id).select("-password");
+    const foundUser = await UserModel.findById(user).select("-password");
     if (!foundUser) {
       return NextResponse.json(
         { success: false, message: "User Does Not Exist" },

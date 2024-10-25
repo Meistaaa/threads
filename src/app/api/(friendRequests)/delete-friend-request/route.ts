@@ -2,6 +2,7 @@ import dbConnect from "@/app/lib/dbConnect";
 import UserModel from "@/app/models/User";
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
+import mongoose from "mongoose";
 
 export async function POST(req: NextRequest) {
   await dbConnect();
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Find fromUser and assert the type
-    const foundUser = await UserModel.findById(user._id);
+    const foundUser = await UserModel.findById(user);
     if (!foundUser) {
       return NextResponse.json(
         { success: false, message: "User Does Not Exist" },
@@ -43,10 +44,25 @@ export async function POST(req: NextRequest) {
       { success: true, message: "Friend request removed successfully." },
       { status: 200 }
     );
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, message: "Error Registering User" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    if (error instanceof mongoose.Error) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: error.message || "Unable to register user at the moment.",
+        },
+        { status: 500 }
+      );
+    } else if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 500 }
+      );
+    } else {
+      return NextResponse.json(
+        { success: false, message: "An unexpected error occurred." },
+        { status: 500 }
+      );
+    }
   }
 }

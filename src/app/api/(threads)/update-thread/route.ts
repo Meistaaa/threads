@@ -28,6 +28,12 @@ export async function PUT(req: NextRequest) {
       { new: true, runValidators: true } // Return the updated document & validate the schema
     );
 
+    if (updateThread.author !== user) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized!" },
+        { status: 404 }
+      );
+    }
     if (!updateThread) {
       return NextResponse.json(
         { success: false, message: "Failed to update a Thread" },

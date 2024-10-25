@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       );
     }
     // Find the user and assert the type
-    const foundUser = await UserModel.findById(user._id);
+    const foundUser = await UserModel.findById(user);
     if (!foundUser) {
       return NextResponse.json(
         { success: false, message: "User Does Not Exist" },

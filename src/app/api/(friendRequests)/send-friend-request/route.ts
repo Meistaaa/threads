@@ -1,6 +1,7 @@
 import dbConnect from "@/app/lib/dbConnect";
 import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
 import UserModel from "@/app/models/User";
+import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Find fromUser and assert the type
-    const fromUser = await UserModel.findById(user._id);
+    const fromUser = await UserModel.findById(user);
     console.log(fromUser?.username);
     if (!fromUser) {
       return NextResponse.json(
@@ -64,10 +65,26 @@ export async function POST(req: NextRequest) {
       { success: true, message: "Friend Request Sent Successfully!" },
       { status: 200 }
     );
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, message: "Error Registering User" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    if (error instanceof mongoose.Error) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            error.message || "Unable to send friend request at the moment.",
+        },
+        { status: 500 }
+      );
+    } else if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 500 }
+      );
+    } else {
+      return NextResponse.json(
+        { success: false, message: "An unexpected error occurred." },
+        { status: 500 }
+      );
+    }
   }
 }
