@@ -1,18 +1,36 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from "react";
 import { Upload } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
 
-interface Thread {
+interface User {
   username: string;
   bio: string;
   profilePic: string;
+}
+
+function deleteImageByUrl(imageUrl: string) {
+  const storage = getStorage();
+  const imageRef = ref(storage, imageUrl);
+  deleteObject(imageRef)
+    .then(() => {
+      console.log("Old image deleted successfully.");
+    })
+    .catch((error) => {
+      console.error("Error deleting old image:", error);
+    });
 }
 
 export default function EditProfile({
@@ -24,14 +42,24 @@ export default function EditProfile({
   username: string;
   bio: string;
   profilePic: string;
-  onSave: (data: Thread) => void;
+  onSave: (data: User) => void;
 }) {
   const [username, setUsername] = useState(initialUsername);
   const [bio, setBio] = useState(initialBio);
-  const [profilePic, setProfilePic] = useState(initialProfilePic); // Fallback to a default image
+  const [profilePic, setProfilePic] = useState(initialProfilePic);
+  const [oldProfilePic, setOldProfilePic] = useState(initialProfilePic);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Cleanup newly uploaded but unsaved images on component unmount
+    return () => {
+      if (file && profilePic !== oldProfilePic) {
+        deleteImageByUrl(profilePic);
+      }
+    };
+  }, [file, profilePic, oldProfilePic]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +93,11 @@ export default function EditProfile({
         });
 
         if (response.data.success) {
+          // Delete old image if it was replaced
+          if (oldProfilePic && oldProfilePic !== profilePicUrl) {
+            deleteImageByUrl(oldProfilePic);
+          }
+
           // Call the onSave callback to update the parent component
           onSave(response.data);
         } else {
@@ -73,11 +106,10 @@ export default function EditProfile({
       } catch (apiError) {
         setError("Failed to update the profile. Please try again.");
       }
-
-      setLoading(false);
     } catch (err) {
-      setLoading(false);
       setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,7 +122,11 @@ export default function EditProfile({
           {/* Avatar component from ShadCN */}
           <Avatar className="w-16 h-16">
             <AvatarImage src={profilePic} alt="Profile" />
-            <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
+            {username && (
+              <AvatarFallback>
+                {username.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            )}
           </Avatar>
 
           <Label

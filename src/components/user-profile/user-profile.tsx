@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios"; // Ensure axios is installed, or replace with fetch
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,17 +13,38 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import EditProfile from "../edit-user-profile/edit-user-profile";
-import Image from "next/image";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 
+export interface UserProfile {
+  username: string;
+  bio: string;
+  profilePic: string;
+}
+
 export default function FullUserProfile() {
   const [isOpen, setIsOpen] = useState(false);
-  const [username, setUsername] = useState("meista");
+  const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [profilePic, setProfilePic] = useState("");
 
-  const handleProfileUpdate = (data) => {
+  useEffect(() => {
+    axios
+      .get("/api/me")
+      .then((response) => {
+        const { username, bio, pfp } = response.data.data;
+        console.log(response.data);
+        setUsername(username || "");
+        setBio(bio || "");
+        setProfilePic(pfp || "");
+      })
+      .catch((error) => {
+        console.error("Failed to fetch user data:", error);
+        // Handle errors appropriately
+      });
+  }, [username, bio, profilePic]);
+
+  const handleProfileUpdate = (data: UserProfile) => {
     setUsername(data.username);
     setBio(data.bio);
     setProfilePic(data.profilePic);
@@ -36,16 +58,15 @@ export default function FullUserProfile() {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h1 className="text-2xl font-bold">{username}</h1>
-              <p className="text-zinc-400">retarded_meista</p>
             </div>
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-yellow-500 overflow-hidden">
-              <Avatar className="w-16 h-16">
-                <AvatarImage src={profilePic} alt="Profile" />
-                <AvatarFallback className="text-black">
+            <Avatar className="w-16 h-16">
+              <AvatarImage src={profilePic} alt="Profile" />
+              {username && (
+                <AvatarFallback>
                   {username.charAt(0).toUpperCase()}
                 </AvatarFallback>
-              </Avatar>
-            </div>
+              )}
+            </Avatar>
           </div>
 
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -90,7 +111,6 @@ export default function FullUserProfile() {
             </TabsList>
             <TabsContent value="threads">
               <div className="flex items-center gap-2 mt-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-yellow-500"></div>
                 <Input
                   placeholder="What's new?"
                   className="bg-zinc-800 border-none"
@@ -109,43 +129,6 @@ export default function FullUserProfile() {
               </p>
             </TabsContent>
           </Tabs>
-
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">Finish your profile</h2>
-            <div className="space-y-4">
-              {["Create thread", "Add bio", "Add profile photo"].map(
-                (item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center">
-                        {index === 0 && (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-6 h-6"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M12 6v12m6-6H6"
-                            />
-                          </svg>
-                        )}
-                      </div>
-                      <p className="text-lg">{item}</p>
-                    </div>
-                    <Button variant="outline">Add</Button>
-                  </div>
-                )
-              )}
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

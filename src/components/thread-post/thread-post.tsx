@@ -38,6 +38,7 @@ export default function ThreadPost() {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files);
+      console.log(newFiles);
       setImageUploads((prevUploads) => [...prevUploads, ...newFiles]);
       const newUrls = newFiles.map((file) => URL.createObjectURL(file));
       setImageUrls((prevUrls) => [...prevUrls, ...newUrls]);

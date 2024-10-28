@@ -19,15 +19,24 @@ export async function GET() {
         }
       );
     }
+    console.log("test1");
     const me = await UserModel.findById(user).select("-password");
+    console.log("test2");
     if (!me) {
       return NextResponse.json(
         { success: false, message: "User Does Not Exist" },
         { status: 404 }
       );
     }
+    console.log(me);
 
-    return NextResponse.json({ success: false, data: me }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: { username: me.username, bio: me.bio, pfp: me.imageUrl },
+      },
+      { status: 200 }
+    );
   } catch (error: unknown) {
     if (error instanceof mongoose.Error) {
       return NextResponse.json(
