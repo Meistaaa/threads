@@ -11,10 +11,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import EditProfile from "../EditUserProfile/EditUserProfile";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import UserThreads from "../UserProfile/UserThreads";
+import EditProfile from "../EditUserProfile/EditUserProfile";
 
 export interface UserProfile {
   username: string;

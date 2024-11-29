@@ -30,9 +30,8 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       );
     }
-
     const { username, bio, avatar } = await req.json();
-
+    console.log(username, bio, avatar);
     if (!username) {
       return NextResponse.json(
         { success: false, message: "Username Field Cannot be Empty" },

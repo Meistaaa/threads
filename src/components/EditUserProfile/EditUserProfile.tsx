@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
-import { Upload } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState, useCallback } from "react";
+import Cropper from "react-easy-crop";
 import {
   getStorage,
   ref,
@@ -8,12 +7,16 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
+import { storage } from "@/app/lib/firebase";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Upload } from "lucide-react";
+import getCroppedImg from "@/app/helpers/getCroppedImage";
 
 interface User {
   username: string;
@@ -49,62 +52,87 @@ export default function EditProfile({
   const [profilePic, setProfilePic] = useState(initialProfilePic);
   const [oldProfilePic, setOldProfilePic] = useState(initialProfilePic);
   const [file, setFile] = useState<File | null>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<null | {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    // Cleanup newly uploaded but unsaved images on component unmount
-    return () => {
-      if (file && profilePic !== oldProfilePic) {
-        deleteImageByUrl(profilePic);
-      }
-    };
-  }, [file, profilePic, oldProfilePic]);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(selectedFile);
+      setFile(selectedFile);
+    }
+  };
+
+  const onCropComplete = useCallback((_, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+    console.log("hello");
     try {
       let profilePicUrl = profilePic;
 
-      // Upload the new profile pic to Firestore if a new file is selected
-      if (file) {
-        const storage = getStorage();
-        const storageRef = ref(storage, `profile-pics/${uuidv4()}`);
-
+      console.log("hello2");
+      if (file && croppedAreaPixels && preview) {
         try {
-          await uploadBytes(storageRef, file);
+          console.log("Starting image cropping...");
+          const croppedImage = await getCroppedImg(preview, croppedAreaPixels);
+          console.log("Cropped image URL:", croppedImage);
+
+          const blob = await fetch(croppedImage).then((r) => {
+            if (!r.ok)
+              throw new Error(`Failed to fetch cropped image: ${r.statusText}`);
+            return r.blob();
+          });
+          console.log("Fetched image blob:", blob);
+
+          const storageRef = ref(storage, `profile-pics/${uuidv4()}`);
+          console.log("Uploading to Firebase Storage...");
+
+          await uploadBytes(storageRef, blob);
+          console.log("Upload successful, fetching download URL...");
+
           profilePicUrl = await getDownloadURL(storageRef);
-        } catch (uploadError) {
-          setLoading(false);
-          setError("Failed to upload profile picture. Please try again.");
-          return; // Stop the form submission if the upload fails
+          console.log("Download URL:", profilePicUrl);
+        } catch (error) {
+          console.error("Error in image upload process:", error);
+          setError("Failed to process and upload the profile picture.");
+          return;
         }
       }
 
-      // Send the updated user data, including the profile picture URL, to your API
-      try {
-        const response = await axios.post("/api/edit-user-profile", {
-          username,
-          bio,
-          imageUrl: profilePicUrl, // Use imageUrl to match the API
-        });
+      console.log("hello4");
 
-        if (response.data.success) {
-          // Delete old image if it was replaced
-          if (oldProfilePic && oldProfilePic !== profilePicUrl) {
-            deleteImageByUrl(oldProfilePic);
-          }
+      const response = await axios.post("/api/edit-user-profile", {
+        username,
+        bio,
+        avatar: profilePicUrl,
+      });
 
-          // Call the onSave callback to update the parent component
-          onSave(response.data);
-        } else {
-          setError(response.data.message || "Failed to update the profile.");
+      console.log("hello5");
+      if (response.data.success) {
+        if (oldProfilePic && oldProfilePic !== profilePicUrl) {
+          deleteImageByUrl(oldProfilePic);
         }
-      } catch (apiError) {
-        setError("Failed to update the profile. Please try again.");
+        onSave(response.data);
+      } else {
+        setError(response.data.message || "Failed to update the profile.");
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
@@ -119,16 +147,10 @@ export default function EditProfile({
       <div>
         <Label htmlFor="profile-pic">Profile Picture</Label>
         <div className="flex items-center gap-2 mt-1">
-          {/* Avatar component from ShadCN */}
           <Avatar className="w-16 h-16">
             <AvatarImage src={profilePic} alt="Profile" />
-            {username && (
-              <AvatarFallback>
-                {username.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            )}
+            <AvatarFallback>{username?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
-
           <Label
             htmlFor="profile-pic-upload"
             className="cursor-pointer bg-zinc-700 text-white px-3 py-2 rounded-md hover:bg-zinc-600 transition-colors"
@@ -140,27 +162,29 @@ export default function EditProfile({
             id="profile-pic-upload"
             type="file"
             className="hidden"
-            onChange={(e) => {
-              const selectedFile = e.target.files?.[0];
-              if (selectedFile) {
-                setFile(selectedFile);
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  setProfilePic(reader.result as string);
-                };
-                reader.readAsDataURL(selectedFile);
-              }
-            }}
+            onChange={handleFileChange}
           />
         </div>
       </div>
+      {preview && (
+        <div className="relative w-full h-64 bg-gray-800">
+          <Cropper
+            image={preview}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={onCropComplete}
+          />
+        </div>
+      )}
       <div>
         <Label htmlFor="username">Username</Label>
         <Input
           id="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="bg-zinc-700 border-zinc-600 text-white"
         />
       </div>
       <div>
@@ -169,14 +193,9 @@ export default function EditProfile({
           id="bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
-          className="bg-zinc-700 border-zinc-600 text-white"
         />
       </div>
-      <Button
-        type="submit"
-        className="w-full bg-blue-500 hover:bg-blue-600"
-        disabled={loading}
-      >
+      <Button type="submit" disabled={loading}>
         {loading ? "Saving..." : "Save Changes"}
       </Button>
     </form>
