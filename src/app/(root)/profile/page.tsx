@@ -1,4 +1,4 @@
-import FullUserProfile from "@/components/user-profile/user-profile";
+import FullUserProfile from "@/components/UserProfile/UserProfile";
 
 export default function ProfilePage() {
   return (

@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { username, bio, imageUrl } = await req.json();
+    const { username, bio, avatar } = await req.json();
 
     if (!username) {
       return NextResponse.json(
@@ -40,10 +40,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Optional validation for bio and imageUrl if necessary
+    // Optional validation for bio and avatar if necessary
     foundUser.username = username;
     foundUser.bio = bio || foundUser.bio;
-    foundUser.imageUrl = imageUrl || foundUser.imageUrl;
+    foundUser.avatar = avatar || foundUser.avatar;
 
     await foundUser.save();
 

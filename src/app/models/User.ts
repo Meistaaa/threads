@@ -1,17 +1,17 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { Community } from "./Community";
-import { Thread } from "./Thread";
+import { ThreadModel } from "./Thread";
 
 export interface User extends Document {
   username: string;
   email: string;
   password: string;
-  imageUrl: string;
+  avatar: string;
   bio: string;
   isVerified: boolean;
   onBoarded: boolean;
   communities: Community[];
-  threads: Thread[];
+  threads: ThreadModel[];
   friendRequest: User[];
   friends: User[];
   sentFriendRequest: User[];
@@ -42,7 +42,7 @@ const UserSchema: Schema<User> = new Schema({
     type: Boolean,
     default: false,
   },
-  imageUrl: String,
+  avatar: String,
   bio: String,
   verifyCode: {
     type: String,

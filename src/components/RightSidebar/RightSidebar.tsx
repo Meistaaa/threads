@@ -11,27 +11,12 @@ export function RightSidebar() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
         <Input
-          className="pl-10 bg-gray-900 border-gray-800 focus:border-blue-500"
+          className="pl-10 bg-black border-gray-800 focus:border-blue-500"
           placeholder="Search"
         />
       </div>
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-xl text-white font-bold">
-            Subscribe to Premium
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-400 mb-4">
-            Subscribe to unlock new features and if eligible, receive a share of
-            ads revenue.
-          </p>
-          <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold">
-            Subscribe
-          </Button>
-        </CardContent>
-      </Card>
-      <Card className="bg-gray-900 border-gray-800">
+
+      <Card className="bg-black border-gray-800">
         <CardHeader>
           <CardTitle className="text-xl font-bold text-white">
             Who to follow
@@ -52,38 +37,6 @@ export function RightSidebar() {
             avatar="/placeholder.svg?height=40&width=40"
             name="Chloesimagination 🐰"
             handle="@ChloeImagine"
-          />
-          <Link href="#" className="text-blue-400 text-sm hover:underline">
-            Show more
-          </Link>
-        </CardContent>
-      </Card>
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold text-white">
-            France trends
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <TrendingTopic
-            category="Super Mario · Trending"
-            hashtag="#LEGOSuperMarioWorld"
-            posts="4,823 posts"
-          />
-          <TrendingTopic
-            category="Trending"
-            hashtag="#FreebetWinamax"
-            posts="23.2K posts"
-          />
-          <TrendingTopic
-            category="Trending"
-            hashtag="Moldavie"
-            posts="24.3K posts"
-          />
-          <TrendingTopic
-            category="TV stars · Trending"
-            hashtag="Ardisson"
-            posts="19.9K posts"
           />
           <Link href="#" className="text-blue-400 text-sm hover:underline">
             Show more

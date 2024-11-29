@@ -1,7 +1,7 @@
-import { MainContent } from "@/components/main-content/main-content";
-import ThreadPost from "@/components/thread-post/thread-post";
+import ThreadPost from "@/components/ThreadPost/ThreadPost";
+import { MainContent } from "@/components/MainContent/MainContent";
 
-export default function Home() {
+export default async function Home() {
   return (
     <>
       <ThreadPost />

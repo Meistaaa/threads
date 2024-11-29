@@ -19,21 +19,18 @@ export async function GET() {
         }
       );
     }
-    console.log("test1");
     const me = await UserModel.findById(user).select("-password");
-    console.log("test2");
     if (!me) {
       return NextResponse.json(
         { success: false, message: "User Does Not Exist" },
         { status: 404 }
       );
     }
-    console.log(me);
-
+    console.log("me route ts : ", me);
     return NextResponse.json(
       {
         success: true,
-        data: { username: me.username, bio: me.bio, pfp: me.imageUrl },
+        data: me,
       },
       { status: 200 }
     );

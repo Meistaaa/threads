@@ -2,7 +2,8 @@ import mongoose, { Schema } from "mongoose";
 import { User } from "./User";
 import { Community } from "./Community";
 
-export interface Thread extends Document {
+export interface ThreadModel extends Document {
+  _id: string;
   text: string;
   author: User;
   community: Community;
@@ -10,7 +11,7 @@ export interface Thread extends Document {
   createdAt: Date;
   parentId: string;
 }
-const threadSchema: Schema<Thread> = new mongoose.Schema({
+const threadSchema: Schema<ThreadModel> = new mongoose.Schema({
   text: {
     type: String,
   },

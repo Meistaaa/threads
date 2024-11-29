@@ -1,11 +1,11 @@
 "use client";
-import { Thread } from "@/app/types/Threads";
-import { Tweet } from "../Tweet";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ThreadModel } from "@/app/models/Thread";
 import axios from "axios";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Thread } from "../Thread";
 
-export function MainContent() {
-  const [threads, setthreads] = useState<Thread[]>([]);
+const UserThreads = () => {
+  const [threads, setthreads] = useState<ThreadModel[]>([]);
   const [cursor, setCursor] = useState<Date | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -34,7 +34,7 @@ export function MainContent() {
 
     setLoading(true); // Set loading to true
     axios
-      .get("/api/get-threads", {
+      .get("/api/get-user-threads", {
         params: { cursor: cursor?.toISOString(), limit: 2 },
       })
       .then((res) => {
@@ -44,7 +44,8 @@ export function MainContent() {
         setthreads((prevthreads) => [
           ...prevthreads,
           ...newthreads.filter(
-            (thread: Thread) => !prevthreads.some((p) => p._id === thread._id)
+            (thread: ThreadModel) =>
+              !prevthreads.some((p) => p._id === thread._id)
           ),
         ]);
         setHasMore(newthreads.length > 0);
@@ -67,20 +68,30 @@ export function MainContent() {
   return (
     <div className="flex flex-col w-full">
       <header className="sticky top-0 z-10 bg-black bg-opacity-70 backdrop-blur p-4 border-b border-gray-800">
-        <h1 className="text-xl font-bold">Home</h1>
+        <h1 className="text-xl font-bold">Your Threads</h1>
       </header>
       <div className="flex-1">
         {threads.map((thread, index) => {
           if (threads.length === index + 1) {
             return (
               <div ref={lastthreadRef} key={thread._id}>
-                <Tweet content={thread.text} imageUrls={thread.imageUrls} />
+                <Thread
+                  author={thread.author}
+                  content={thread.text}
+                  imageUrls={thread.imageUrls}
+                  createdAt={thread.createdAt.toString()}
+                />
               </div>
             );
           } else {
             return (
               <div key={thread._id}>
-                <Tweet content={thread.text} imageUrls={thread.imageUrls} />
+                <Thread
+                  createdAt={thread.createdAt.toString()}
+                  author={thread.author}
+                  content={thread.text}
+                  imageUrls={thread.imageUrls}
+                />
               </div>
             );
           }
@@ -88,4 +99,6 @@ export function MainContent() {
       </div>
     </div>
   );
-}
+};
+
+export default UserThreads;

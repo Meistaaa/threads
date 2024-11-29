@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../globals.css";
 import AuthProvider from "../context/AuthProvider";
-import { LeftSidebar } from "@/components/left-sidebar/LeftSidebar";
-import { RightSidebar } from "@/components/right-sidebar/RightSidebar";
-import { BottomNav } from "@/components/bottom-navbar/BottomNavbar";
+import { LeftSidebar } from "@/components/LeftSidebar/LeftSidebar";
+import { RightSidebar } from "@/components/RightSidebar/RightSidebar";
+import { BottomNav } from "@/components/BottomNavbar/BottomNavbar";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",

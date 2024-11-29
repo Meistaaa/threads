@@ -1,14 +1,20 @@
 import dbConnect from "@/app/lib/dbConnect";
-import { NextRequest, NextResponse } from "next/server";
 import Thread from "@/app/models/Thread";
+import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
-import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
-
-export async function POST(req: NextRequest) {
+import { getServerSession, User } from "next-auth";
+import { authOptions } from "../../(authentication)/auth/[...nextauth]/options";
+export async function GET(req: NextRequest) {
   await dbConnect();
+
+  const { searchParams } = req.nextUrl;
+  const cursor = searchParams.get("cursor");
+  const limit = parseInt(searchParams.get("limit") || "10");
   try {
-    const user = await authenticateUser();
-    if (!user) {
+    const session = await getServerSession(authOptions);
+    const user: User = session?.user as User;
+
+    if (!session || !user) {
       return NextResponse.json(
         {
           success: false,
@@ -19,27 +25,20 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    const reqBody = await req.json();
-    const {
-      content,
-      imageUrls,
-    }: { content: string; imageUrls: Array<string> } = reqBody;
-    if (content.length === 0 && imageUrls.length === 0) {
-      return NextResponse.json(
-        { success: false, message: "The Thread cannot be empty" },
-        { status: 400 }
-      );
+
+    let query = {};
+    if (cursor) {
+      query = { createdAt: { $lt: cursor }, author: user };
     }
-    const newThread = new Thread({
-      author: user,
-      text: content,
-      imageUrls,
-    });
-    await newThread.save();
+    const threads = await Thread.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit);
     return NextResponse.json(
       {
         success: true,
-        message: "Upload Complete",
+        data: threads,
+        nextCursor:
+          threads.length > 0 ? threads[threads.length - 1].createdAt : null,
       },
       { status: 200 }
     );
@@ -48,7 +47,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: error.message || "Unable to post thread at the moment.",
+          message: error.message || "Unable to get threads at the moment.",
         },
         { status: 500 }
       );
