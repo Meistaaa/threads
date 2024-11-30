@@ -68,13 +68,14 @@ export async function POST(req: NextRequest) {
     }
 
     //send verification email
+    console.log("user email send");
 
     const emailResponse = await sendVerificationEmail(
       email,
       username,
       verifyCode
     );
-
+    console.log(emailResponse);
     if (!emailResponse.success) {
       return NextResponse.json(
         {
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
-
+    console.log("user email sent");
     return NextResponse.json(
       {
         success: true,

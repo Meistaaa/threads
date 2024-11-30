@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const decodedUsername = decodeURIComponent(username);
 
     const user = await UserModel.findOne({ username: decodedUsername });
-
+    console.log(decodedUsername, code);
     if (!user) {
       return NextResponse.json(
         {

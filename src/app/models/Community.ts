@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
-import { Thread } from "./Thread";
 import { User } from "./User";
+import { ThreadModel } from "./Thread";
 
 export interface Community extends Document {
   id: string;
@@ -9,7 +9,7 @@ export interface Community extends Document {
   image: string;
   bio: string;
   createdBy: User;
-  threads: Thread[];
+  threads: ThreadModel[];
   members: User[];
 }
 const communitySchema: Schema<Community> = new mongoose.Schema({

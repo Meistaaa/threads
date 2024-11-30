@@ -1,6 +1,6 @@
 import { ApiResponse } from "../types/ApiResponse";
 import VerificationEmail from "../../../emails/VerificationEmail";
-import { resend } from "../lib/resend";
+import { Resend } from "resend";
 
 export async function sendVerificationEmail(
   email: string,
@@ -8,6 +8,7 @@ export async function sendVerificationEmail(
   verifyCode: string
 ): Promise<ApiResponse> {
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: "Acme <onboarding@resend.dev>",
       to: email,

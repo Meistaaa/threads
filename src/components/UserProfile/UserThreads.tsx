@@ -71,31 +71,37 @@ const UserThreads = () => {
         <h1 className="text-xl font-bold">Your Threads</h1>
       </header>
       <div className="flex-1">
-        {threads.map((thread, index) => {
-          if (threads.length === index + 1) {
-            return (
-              <div ref={lastthreadRef} key={thread._id}>
-                <Thread
-                  author={thread.author}
-                  content={thread.text}
-                  imageUrls={thread.imageUrls}
-                  createdAt={thread.createdAt.toString()}
-                />
-              </div>
-            );
-          } else {
-            return (
-              <div key={thread._id}>
-                <Thread
-                  createdAt={thread.createdAt.toString()}
-                  author={thread.author}
-                  content={thread.text}
-                  imageUrls={thread.imageUrls}
-                />
-              </div>
-            );
-          }
-        })}
+        {threads.length > 0 ? (
+          threads.map((thread, index) => {
+            if (threads.length === index + 1) {
+              return (
+                <div ref={lastthreadRef} key={thread._id}>
+                  <Thread
+                    author={thread.author}
+                    content={thread.text}
+                    imageUrls={thread.imageUrls}
+                    createdAt={thread.createdAt.toString()}
+                  />
+                </div>
+              );
+            } else {
+              return (
+                <div key={thread._id}>
+                  <Thread
+                    createdAt={thread.createdAt.toString()}
+                    author={thread.author}
+                    content={thread.text}
+                    imageUrls={thread.imageUrls}
+                  />
+                </div>
+              );
+            }
+          })
+        ) : (
+          <div className="text-center text-gray-500 mt-4">
+            No threads to show
+          </div>
+        )}
       </div>
     </div>
   );

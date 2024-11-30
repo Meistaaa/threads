@@ -1,11 +1,16 @@
-// middleware.js
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export { default } from "next-auth/middleware";
 
 export const config = {
-  matcher: ["/sign-in", "/sign-up", "/", "/verify/:path*"], // Adjust this as necessary
+  matcher: [
+    "/sign-in",
+    "/sign-up",
+    "/",
+    "/verify/:path*", // Adjust this as necessary
+    "/onboarding/:path*", // Match all onboarding paths dynamically
+  ],
 };
 
 export async function middleware(request: NextRequest) {
@@ -14,23 +19,39 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
   const url = request.nextUrl;
-  // Check if user is already on the homepage and authenticated
-  if (token && url.pathname === "/") {
-    return NextResponse.next(); // Allow access to the homepage
+
+  console.log("Token:", token);
+  console.log("Current Path:", url.pathname);
+
+  // If user is authenticated and onboarded, allow access to all pages
+  if (token && token.isVerified && token.onBoarded) {
+    // Prevent redirect loop: Allow `/onboarding/:username` to pass
+    if (url.pathname.startsWith(`/onboarding/`)) {
+      return NextResponse.redirect(new URL("/", request.url)); // Redirect to home
+    }
+    return NextResponse.next();
   }
 
-  // Redirect to homepage if the user is authenticated
-  if (
-    token &&
-    (url.pathname.startsWith("/sign-in") || url.pathname.startsWith("/sign-up"))
-  ) {
-    return NextResponse.redirect(new URL("/", request.url)); // Redirect to homepage
+  // If user is authenticated but not onboarded, redirect to onboarding
+  if (token && token.isVerified && !token.onBoarded) {
+    // Prevent redirect loop: Allow `/onboarding/:username` to pass
+    if (!url.pathname.startsWith(`/onboarding/`)) {
+      return NextResponse.redirect(
+        new URL(`/onboarding/${token.username}`, request.url)
+      );
+    }
+    return NextResponse.next();
   }
 
-  // If not authenticated and trying to access protected routes
-  if (!token && url.pathname !== "/sign-in" && url.pathname !== "/sign-up") {
-    return NextResponse.redirect(new URL("/sign-in", request.url)); // Redirect to sign-in
+  // If user is not authenticated, redirect to `/sign-in` for protected routes
+  if (!token) {
+    const isProtectedRoute =
+      url.pathname !== "/sign-in" && url.pathname !== "/sign-up";
+    if (isProtectedRoute) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
   }
 
+  // Allow access to public and allowed routes
   return NextResponse.next();
 }

@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { signIn } from "next-auth/react";
 import {
   Form,
   FormField,
@@ -15,45 +14,52 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signInSchema } from "@/app/schemas/signInSchema";
 import { useToast } from "@/hooks/use-toast";
+import { signUpSchema } from "@/app/schemas/signUpSchema";
+import axios from "axios";
 
 export default function SignUpForm() {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof signInSchema>>({
-    resolver: zodResolver(signInSchema),
+  const form = useForm<z.infer<typeof signUpSchema>>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
-      identifier: "",
+      email: "",
+      username: "",
       password: "",
     },
   });
 
   const { toast } = useToast();
-  const onSubmit = async (data: z.infer<typeof signInSchema>) => {
-    const result = await signIn("credentials", {
-      redirect: false,
-      identifier: data.identifier,
-      password: data.password,
-    });
-    console.log("testing ", result);
-    if (result?.error) {
-      if (result.error === "CredentialsSignin") {
+  const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
+    try {
+      // Send data to the API
+      const result = await axios.post("/api/sign-up", data);
+
+      // Show success toast
+      toast({
+        title: "Signup Successful",
+        description: "Welcome to the platform!",
+        variant: "default", // Adjust `variant` to your toast library's needs
+      });
+      router.replace(`/verify-code/${data.username}`);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const serverMessage =
+          error.response?.data?.message || "An error occurred.";
         toast({
-          title: "Login Failed",
-          description: "Incorrect username or password",
-          variant: "destructive",
+          title: "Signup Failed",
+          description: serverMessage,
+          variant: "destructive", // Error variant
         });
       } else {
+        // Handle unexpected errors
         toast({
           title: "Error",
-          description: result.error,
+          description: "Something went wrong. Please try again later.",
           variant: "destructive",
         });
       }
-    }
-    if (result?.url) {
-      router.replace("/");
     }
   };
 
@@ -64,16 +70,27 @@ export default function SignUpForm() {
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
             Welcome Back to True Feedback
           </h1>
-          <p className="mb-4">Sign in to continue your secret conversations</p>
+          <p className="mb-4">Sign Up to continue to our website</p>
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
-              name="identifier"
+              name="email"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email/Username</FormLabel>
+                  <FormLabel>Email</FormLabel>
+                  <Input {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="username"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
                   <Input {...field} />
                   <FormMessage />
                 </FormItem>
@@ -91,15 +108,15 @@ export default function SignUpForm() {
               )}
             />
             <Button className="w-full" type="submit">
-              Sign In
+              Sign Up
             </Button>
           </form>
         </Form>
-        <div className="text-center mt-4">
+        <div className="text-center m-4">
           <p>
-            Not a member yet?{" "}
+            Already Have an account?{" "}
             <Link href="/sign-up" className="text-blue-600 hover:text-blue-800">
-              Sign up
+              Sign Up
             </Link>
           </p>
         </div>

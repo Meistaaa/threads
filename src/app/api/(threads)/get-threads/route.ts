@@ -3,6 +3,7 @@ import Thread from "@/app/models/Thread";
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import UserModel from "@/app/models/User";
+import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
 export async function GET(req: NextRequest) {
   await dbConnect();
 
@@ -10,11 +11,15 @@ export async function GET(req: NextRequest) {
   const cursor = searchParams.get("cursor");
   const limit = parseInt(searchParams.get("limit") || "10");
   try {
+    const user = await authenticateUser();
     let query = {};
     if (cursor) {
       query = { createdAt: { $lt: cursor } };
     }
-    const threads = await Thread.find(query)
+    const threads = await Thread.find({
+      query,
+      author: { $ne: user },
+    })
       .sort({ createdAt: -1 })
       .limit(limit)
       .populate("author", "username avatar"); // Populate user information

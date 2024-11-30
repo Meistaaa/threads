@@ -55,23 +55,35 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, token }) {
-      if (token) {
-        session.user._id = token._id;
-        session.user.isVerified = token.isVerified;
-        session.user.isAcceptingMessages = token.isVerified;
-        session.user.username = token.username;
-      }
-      return session;
-    },
-    async jwt({ user, token }) {
+    async jwt({ token, user }) {
+      // On initial sign-in
       if (user) {
         token._id = user._id?.toString();
         token.isVerified = user.isVerified;
-        token.isAcceptingMessages = user.isAcceptingMessages;
+        token.onBoarded = user.onBoarded; // Set initial value
         token.username = user.username;
       }
+
+      // On every request (after initial sign-in)
+      if (!token.onBoarded) {
+        // Fetch latest `onBoarded` value from the database
+        const foundUser = await UserModel.findById(token._id).select(
+          "onBoarded"
+        );
+        if (foundUser) {
+          token.onBoarded = foundUser.onBoarded;
+        }
+      }
+
       return token;
+    },
+    async session({ session, token }) {
+      // Pass token data to the session
+      session.user._id = token._id;
+      session.user.isVerified = token.isVerified;
+      session.user.onBoarded = token.onBoarded;
+      session.user.username = token.username;
+      return session;
     },
   },
   pages: {
