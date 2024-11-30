@@ -50,10 +50,10 @@ export function Thread({
     }
   };
 
-  return ({author.avatar && (
+  return (
     <div className="flex p-4 space-x-6 border-b border-gray-800">
       <div className="flex-shrink-0">
-        
+        {author.avatar && (
           <Image
             src={author.avatar}
             alt={`${author.username}'s avatar`}
@@ -61,7 +61,7 @@ export function Thread({
             height={64} // Maintain aspect ratio
             className="rounded-full object-cover" // Ensure the image fits well
           />
-       
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center space-x-2 mb-1">
@@ -136,6 +136,5 @@ export function Thread({
         </div>
       </div>
     </div>
-  )}
   );
 }
