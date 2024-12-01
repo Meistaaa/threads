@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios from "axios"; // Ensure axios is installed, or replace with fetch
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,6 +25,7 @@ export interface UserProfile {
 export default function FullUserProfile() {
   const [isOpen, setIsOpen] = useState(false);
   const [username, setUsername] = useState("");
+  const [threads, setThreads] = useState("");
   const [bio, setBio] = useState("");
   const [profilePic, setProfilePic] = useState("");
 
@@ -32,11 +33,12 @@ export default function FullUserProfile() {
     axios
       .get("/api/me")
       .then((response) => {
-        const { username, bio, avatar } = response.data.data;
+        const { username, bio, avatar, threads } = response.data.data;
         console.log(response.data);
         setUsername(username || "");
         setBio(bio || "");
         setProfilePic(avatar || "");
+        setThreads(threads);
       })
       .catch((error) => {
         console.error("Failed to fetch user data:", error);
@@ -119,9 +121,11 @@ export default function FullUserProfile() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="threads">
-          <div>
-            <UserThreads></UserThreads>
-          </div>
+          {threads.length > 0 && (
+            <div>
+              <UserThreads></UserThreads>
+            </div>
+          )}
         </TabsContent>
         <TabsContent value="replies">
           <p className="text-zinc-400 mt-4">Your replies will appear here.</p>

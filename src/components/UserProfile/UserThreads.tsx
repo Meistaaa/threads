@@ -5,14 +5,14 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Thread } from "../Thread";
 
 const UserThreads = () => {
-  const [threads, setthreads] = useState<ThreadModel[]>([]);
+  const [threads, setThreads] = useState<ThreadModel[]>([]);
   const [cursor, setCursor] = useState<Date | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
 
   const observer = useRef<IntersectionObserver | null>(null);
 
-  const lastthreadRef = useCallback(
+  const lastThreadRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (loading || !hasMore) return; // Prevent loading if it's already fetching or no more threads
 
@@ -41,7 +41,7 @@ const UserThreads = () => {
         const newthreads = res.data.data;
 
         // Update threads state without duplicates
-        setthreads((prevthreads) => [
+        setThreads((prevthreads) => [
           ...prevthreads,
           ...newthreads.filter(
             (thread: ThreadModel) =>
@@ -75,7 +75,7 @@ const UserThreads = () => {
           threads.map((thread, index) => {
             if (threads.length === index + 1) {
               return (
-                <div ref={lastthreadRef} key={thread._id}>
+                <div ref={lastThreadRef} key={thread._id}>
                   <Thread
                     author={thread.author}
                     content={thread.text}

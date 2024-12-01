@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  console.log("object");
   await dbConnect();
   try {
     const user = await authenticateUser();
@@ -26,7 +27,6 @@ export async function GET() {
         { status: 404 }
       );
     }
-    console.log("me route ts : ", me);
     return NextResponse.json(
       {
         success: true,

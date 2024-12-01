@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
+    console.log(avatar);
     foundUser.username = username;
     foundUser.bio = bio || foundUser.bio;
     foundUser.avatar = avatar || foundUser.avatar;

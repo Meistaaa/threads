@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Thread from "@/app/models/Thread";
 import mongoose from "mongoose";
 import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
+import UserModel from "@/app/models/User";
 
 export async function POST(req: NextRequest) {
   await dbConnect();
@@ -30,12 +31,26 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    const foundUser = await UserModel.findById(user);
+    if (!foundUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Not Authenticated",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
     const newThread = new Thread({
       author: user,
       text: content,
       imageUrls,
     });
     await newThread.save();
+    foundUser.threads.push(newThread);
+    await foundUser.save();
     return NextResponse.json(
       {
         success: true,

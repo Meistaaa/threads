@@ -57,10 +57,10 @@ export async function POST(req: NextRequest) {
       const newUser = new UserModel({
         username,
         email,
+        avatar: "",
         password: hashedPassword,
         verifyCode,
         verifyCodeExpiry: expiryDate,
-        isAcceptingMessage: true,
         isVerified: false,
         message: [],
       });

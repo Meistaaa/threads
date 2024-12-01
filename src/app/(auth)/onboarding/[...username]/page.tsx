@@ -11,7 +11,7 @@ import {
 import { storage } from "@/app/lib/firebase";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload } from "lucide-react";
 import getCroppedImg from "@/app/helpers/getCroppedImage";
 import Cropper from "react-easy-crop";
+import { useRouter } from "next/navigation";
 
 // Define Zod schema
 const schema = z.object({
@@ -58,7 +59,7 @@ export default function OnBoardingPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -83,16 +84,10 @@ export default function OnBoardingPage() {
     }
   };
   const onCropComplete = useCallback(
-    ({
-      croppedAreaPixels,
-    }: {
-      croppedAreaPixels: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      };
-    }) => {
+    (
+      croppedArea: { x: number; y: number; width: number; height: number },
+      croppedAreaPixels: { x: number; y: number; width: number; height: number }
+    ) => {
       setCroppedAreaPixels(croppedAreaPixels);
     },
     []
@@ -116,6 +111,7 @@ export default function OnBoardingPage() {
           const storageRef = ref(storage, `profile-pics/${uuidv4()}`);
           await uploadBytes(storageRef, blob);
           profilePicUrl = await getDownloadURL(storageRef);
+          console.log("pfp updated successfully", profilePicUrl);
           setValue("profilePic", profilePicUrl); // Update profilePic in form state
         } catch (error) {
           setError("Failed to process and upload the profile picture.");
@@ -133,6 +129,7 @@ export default function OnBoardingPage() {
         if (oldProfilePic && oldProfilePic !== profilePicUrl) {
           deleteImageByUrl(oldProfilePic);
         }
+        router.replace("/");
       } else {
         setError(response.data.message || "Failed to update the profile.");
       }
