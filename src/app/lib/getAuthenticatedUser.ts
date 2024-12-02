@@ -1,25 +1,23 @@
 import dbConnect from "@/app/lib/dbConnect";
-import { getServerSession, User } from "next-auth";
-import { NextResponse } from "next/server";
-import { authOptions } from "../api/(authentication)/auth/[...nextauth]/options";
+import { NextRequest, NextResponse } from "next/server";
 import UserModel from "../models/User";
+import { getDataFromToken } from "./getDataFromToken";
 
-export async function authenticateUser() {
+export async function authenticateUser(req: NextRequest) {
   await dbConnect();
   try {
-    const session = await getServerSession(authOptions);
-    const user: User = session?.user as User;
-    if (!session || !user) {
-      return null;
+    const user = await getDataFromToken(req);
+    const getUser = await UserModel.findById(user).select("-password");
+    if (!getUser) {
+      return NextResponse.json(
+        { success: false, message: "No user found " },
+        { status: 500 }
+      );
     }
-    const getUser = await UserModel.findById(user._id);
-    console.log(getUser?.id);
-    console.log("hel");
-    return getUser?.id;
+    return getUser;
   } catch (error) {
-    console.log("Failed to upload a post", error);
     return NextResponse.json(
-      { success: false, message: "Failed to upload a post" },
+      { success: false, message: "Failed to check for authenticated User " },
       { status: 500 }
     );
   }

@@ -2,7 +2,7 @@
 import { ThreadModel } from "@/app/types/Threads";
 import { Thread } from "../Thread";
 import { useCallback, useEffect, useRef, useState } from "react";
-import axios from "axios";
+import axiosInstance from "@/app/lib/axios";
 
 export function MainContent() {
   const [threads, setThreads] = useState<ThreadModel[]>([]);
@@ -33,7 +33,7 @@ export function MainContent() {
     if (loading || !hasMore) return; // Prevent loading if it's already fetching or no more threads
 
     setLoading(true); // Set loading to true
-    axios
+    axiosInstance
       .get("/api/get-threads", {
         params: { cursor: cursor?.toISOString(), limit: 2 },
       })

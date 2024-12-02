@@ -3,32 +3,22 @@ import UserModel from "@/app/models/User";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       id: "credentials",
       name: "credentials",
       credentials: {
-        email: {
-          label: "Email",
-          type: "text",
-          placeholder: "jsmith@gmail.com",
-        },
+        identifier: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any): Promise<any> {
-        console.log("hello");
         await dbConnect();
+
         try {
           const user = await UserModel.findOne({
-            $or: [
-              {
-                username: credentials.identifier,
-              },
-              {
-                email: credentials.identifier,
-              },
-            ],
+            email: credentials.identifier,
           });
 
           if (!user) {
@@ -42,12 +32,28 @@ export const authOptions: NextAuthOptions = {
             credentials.password,
             user.password
           );
-
-          if (isPasswordCorrect) {
-            return user;
-          } else {
+          if (!isPasswordCorrect) {
             throw new Error("Incorrect Password");
           }
+          const accessToken = jwt.sign(
+            {
+              _id: user._id,
+              username: user.username,
+              isVerified: user.isVerified,
+              onBoarded: user.onBoarded,
+            },
+            process.env.NEXTAUTH_SECRET!,
+            { expiresIn: "1h" } // Token expires in 1 hour
+          );
+
+          console.log(user?.username);
+          return {
+            _id: user._id,
+            username: user.username,
+            isVerified: user.isVerified,
+            onBoarded: user.onBoarded,
+            accessToken,
+          };
         } catch (error: any) {
           throw new Error(error);
         }
@@ -62,17 +68,7 @@ export const authOptions: NextAuthOptions = {
         token.isVerified = user.isVerified;
         token.onBoarded = user.onBoarded; // Set initial value
         token.username = user.username;
-      }
-
-      // On every request (after initial sign-in)
-      if (!token.onBoarded) {
-        // Fetch latest `onBoarded` value from the database
-        const foundUser = await UserModel.findById(token._id).select(
-          "onBoarded"
-        );
-        if (foundUser) {
-          token.onBoarded = foundUser.onBoarded;
-        }
+        token.accessToken = user.accessToken;
       }
 
       return token;
@@ -83,6 +79,7 @@ export const authOptions: NextAuthOptions = {
       session.user.isVerified = token.isVerified;
       session.user.onBoarded = token.onBoarded;
       session.user.username = token.username;
+      session.accessToken = token.accessToken;
       return session;
     },
   },

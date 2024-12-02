@@ -2,20 +2,17 @@ import dbConnect from "@/app/lib/dbConnect";
 import Thread from "@/app/models/Thread";
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
-import { getServerSession, User } from "next-auth";
-import { authOptions } from "../../(authentication)/auth/[...nextauth]/options";
 import UserModel from "@/app/models/User";
+import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
 export async function GET(req: NextRequest) {
   await dbConnect();
-
+  console.log("hello");
   const { searchParams } = req.nextUrl;
   const cursor = searchParams.get("cursor");
   const limit = parseInt(searchParams.get("limit") || "10");
   try {
-    const session = await getServerSession(authOptions);
-    const user: User = session?.user as User;
-
-    if (!session || !user) {
+    const user = await authenticateUser(req);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,

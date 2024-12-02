@@ -18,9 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { storage } from "@/app/lib/firebase";
 import Image from "next/image";
-import { User } from "@/app/models/User";
 
-export default function ThreadPost() {
+export default function ThreadPost({ avatar }: { avatar: string | null }) {
   const [content, setContent] = useState("");
   const [imageUploads, setImageUploads] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -103,10 +102,12 @@ export default function ThreadPost() {
 
   return (
     <div className="flex space-x-4 p-4 border-b border-gray-200 dark:border-gray-800">
-      <Avatar>
-        <AvatarImage src="test" alt="User avatar" />
-        <AvatarFallback>UN</AvatarFallback>
-      </Avatar>
+      {avatar && (
+        <Avatar>
+          <AvatarImage src={avatar} alt="User avatar" />
+          <AvatarFallback>UN</AvatarFallback>
+        </Avatar>
+      )}
 
       <div className="flex-1">
         <form onSubmit={handleSubmit} className="space-y-4">

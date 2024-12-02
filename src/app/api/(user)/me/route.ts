@@ -1,14 +1,12 @@
 import dbConnect from "@/app/lib/dbConnect";
 import { authenticateUser } from "@/app/lib/getAuthenticatedUser";
-import UserModel from "@/app/models/User";
 import mongoose from "mongoose";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-  console.log("object");
+export async function GET(req: NextRequest) {
   await dbConnect();
   try {
-    const user = await authenticateUser();
+    const user = await authenticateUser(req);
     if (!user) {
       return NextResponse.json(
         {
@@ -20,17 +18,11 @@ export async function GET() {
         }
       );
     }
-    const me = await UserModel.findById(user).select("-password");
-    if (!me) {
-      return NextResponse.json(
-        { success: false, message: "User Does Not Exist" },
-        { status: 404 }
-      );
-    }
+
     return NextResponse.json(
       {
         success: true,
-        data: me,
+        data: user,
       },
       { status: 200 }
     );

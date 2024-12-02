@@ -1,21 +1,36 @@
+import axios from "axios";
 import ThreadPost from "@/components/ThreadPost/ThreadPost";
 import { MainContent } from "@/components/MainContent/MainContent";
-import axios from "axios";
-import { User } from "../models/User";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../api/(authentication)/auth/[...nextauth]/options";
+import axiosInstance from "../lib/axios";
+
+async function fetchUserAvatar() {
+  try {
+    // Retrieve the session for authentication
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.accessToken) {
+      throw new Error("User is not authenticated");
+    }
+
+    const response = await axiosInstance.get(`api/me`);
+
+    // Extract avatar URL from response
+    return response.data?.data?.avatar || null;
+  } catch (error) {
+    console.error("Error fetching user avatar:", error);
+    return null; // Return null as fallback
+  }
+}
 
 export default async function Home() {
-  try {
-    console.log("hello from main ");
-    const res = await axios.get("http://localhost:3000/api/me");
-    const user = res.data.data; // Assuming user data is in res.data.data
-    return (
-      <>
-        <ThreadPost />
-        <MainContent />
-      </>
-    );
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    // Handle the error appropriately, e.g., display an error message to the user
-  }
+  const avatar = await fetchUserAvatar();
+
+  return (
+    <>
+      <ThreadPost avatar={avatar} />
+      <MainContent></MainContent>
+    </>
+  );
 }
